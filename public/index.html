@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Socket.IO chat</title>
+    <meta charset="UTF-8">
+    <style>
+        
+    </style>
+    <link rel="stylesheet" href="styles.css"></link>
+</head>
+
+<body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"> </script>
+
+    <form id="chat">
+        <input type="text" name="username" placeholder="Digite seu usuário"></input>
+        <div class="messages"></div>
+        <input type="text" name="message" placeholder="Digite a mensagem"></input>
+        <button type="submit">Enviar</button>
+    </form>
+
+    <script type="text/javascript">
+        var socket = io('http://localhost:3333')
+
+        function renderMessage(message){
+            $('.messages').append('<div class="message"><strong>'+ message.author+'</strong>: '+ message.message +'</div>')
+        }
+
+        socket.on('previousMessages', function(messages){
+            for (message of messages){
+                renderMessage(message)
+            }
+        })
+
+        socket.on('receivedMessage', function(message){
+            renderMessage(message)
+        })
+
+        $('#chat').submit(function(e){
+            e.preventDefault()
+
+            var author = $('input[name=username]').val()
+            var message = $('input[name=message]').val()
+
+            if(author.length && message.length){
+                var messageObject = {
+                    author: author,
+                    message: message
+                }
+            }
+
+            renderMessage(messageObject)
+
+            socket.emit('sendMessage', messageObject)
+        })
+    </script>
+</body>
+
+</html>
